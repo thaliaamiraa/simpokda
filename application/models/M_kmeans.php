@@ -46,7 +46,7 @@ class M_kmeans extends CI_Model {
     			$this->data_cluster[$i] = $this->data_cluster[$i-1];
           $this->centroid_allof[$i]=$this->data_cluster[$i];
     		}
-        //Cari Jarak Euclidean Distance
+        //hitung euclidean distance
     		foreach ($this->data as $c) {
     			$distance_data = array();
     			foreach ($this->data_cluster[$i] as $d) {
@@ -58,7 +58,7 @@ class M_kmeans extends CI_Model {
     			}
     			$this->distance[$i][]=$distance_data;
     		}
-    		//cluster
+    		//hasil cluster
     		$x=0;
     		foreach ($this->distance[$i] as $key) {
           $min=min($key);
@@ -73,7 +73,7 @@ class M_kmeans extends CI_Model {
     		}
     		$this->data_cluster_temp = $this->data_cluster[$i];
     		$this->data_cluster[$i] = array();
-        //---
+        
         foreach ($this->data_cluster_temp as $key => $value) {
           $temp=array();
           foreach ($value as $keys => $values) {

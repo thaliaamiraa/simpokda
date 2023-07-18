@@ -15,7 +15,7 @@ function aasort (&$array, $key) {
 $process = array();
 if($page == "cluster"){
   if(isset($_POST['simpan'])){
-    //fungsi setiap menyimpan jumlah centroid, maksimal looping, dan nilai centroid ke dalam session
+    //menyimpan fungsi kedalam session (jumlah centroid, maksimal looping, dan nilai centroid)
     $this->session->set_userdata('maxloop',$this->input->post('maxloop'));
     $this->session->set_userdata('centroid',$this->input->post('centroid'));
     $this->session->set_userdata('jmlcentroid',$this->input->post('jmlcentroid'));
@@ -23,16 +23,17 @@ if($page == "cluster"){
     $this->session->set_userdata('isimanual',$this->input->post('isimanual'));
   }
 }
+ //perintah clustering
 if($page == "execute"){
-  //mengeksekusi perintah clustering, cek dulu apakah ada data yang masuk pada if dibawah
+
   if($this->session->userdata('datatoprocess')!==NULL && $this->session->userdata('jmlcentroid')!==NULL && $this->session->userdata('centroid')!==NULL){
     
-    //menginisialisasi data dulu pake fungsi init dan masukan kedalam parameter, fungsi2 nya ada di M_kmeans.php di folder application/model/
+    //menginisialisasi data dulu pake fungsi init dan masukan kedalam parameter, fungsi2 nya ada di M_kmeans
     $this->m_kmeans->init($this->session->userdata('datatoprocess'),$this->session->userdata('jmlcentroid'),$this->session->userdata('centroid'),$this->session->userdata('maxloop'));
     $this->m_kmeans->execute();
     //mengambil hasil proses dari data kmeans yang diolah
     $process = $this->m_kmeans->getprocess();
-    //Hasil ini akan ditampilkan pada menu2 dibawah ini pada variabel $process
+  
   }
 }
 ?>
@@ -67,7 +68,7 @@ if($page == "execute"){
                       </form>
                     </div>
                     <?php
-                        //Ketika upload file data excel akan dikirim ke controller application/controller/operation.php untuk dilakukan pengambilan data dan dimasukan kedalam excel
+                        //Ketika upload file data excel akan dikirim ke controller operation untuk dilakukan pengambilan data dan dimasukan
                         if($this->session->userdata('process_dataset')!==NULL && $this->session->userdata('process_datasetindex')!==NULL){
                           //ambil data session dari data yang di upload, dan dimasukan kedalam variabel biasa untuk dilakukan pengolahan
                             $index = $this->session->userdata('process_datasetindex');
@@ -79,7 +80,7 @@ if($page == "execute"){
                         <thead>
                           <tr>
                             <?php
-                                // ini fungsi untuk menampilkan data dari session kedalam bentuk tabel
+                                // menampilkan data dari session kedalam bentuk tabel
                                 foreach ($index as $key) {
                                   ?>
                                    <th><?=$key?></th>
@@ -124,88 +125,22 @@ if($page == "execute"){
                   </div>
                 <?php
 
-                //Ketika memilih menu Tentukan Cluster
+                //Tentukan Cluster
               }else if($page == 'cluster'){ ?>
                   <h4>Tentukan Centroid & Cluster</h4>
                   <br />
                   <?=form_open("C_kmeans/process/cluster",array("class"=>"form-horizontal","role"=>"form"))?>
                   <form class="form-horizontal" role="form" method="POST">
                     <div id="clustermodal" class="modal fade">
-                        <div class="modal-dialog modal-lg">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h4 class="modal-title">Custom Cluster</h4>
-                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                                </div>
-                                <div class="modal-body p-4">
-                                  <?php
-                                      if($this->session->userdata('process_dataset')!==NULL && $this->session->userdata('process_datasetindex')!==NULL){
-                                          $index = $this->session->userdata('process_datasetindex');
-                                          $dataset = $this->session->userdata('process_dataset');
-                                          ?>
-                                          <div class="card-box table-responsive">
-                                            <h4>Pilih Cluster</h4>
-                                            <?php
-                                            if($this->session->userdata('jmlcentroid')>0){
-                                              //Menampilkan dataset dari session ke tabel
-                                              ?>
-                                              <table class="table table-striped">
-                                                <thead>
-                                                  <tr>
-                                                    <?php
-                                                        foreach ($index as $key) {
-                                                          ?>
-                                                           <th><?=$key?></th>
-                                                          <?php
-                                                        }
-                                                    ?>
-                                                  </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <?php
-                                                    $n=0;
-                                                    foreach ($dataset as $key) {
-                                                        ?>
-                                                        <tr>
-                                                            <?php
-                                                            $x=0;
-                                                             foreach ($index as $keys) {
-                                                               if($x>=1){
-                                                                 ?>
-                                                                     <td><?=$key[$keys]?>&nbsp;<input type="checkbox" name="c[<?=$keys?>][<?=$n?>]" value="<?=$key[$keys]?>" <?=isset($this->session->userdata('c')[$keys][$n])?'checked':''?>/></td>
-                                                                 <?php
-                                                               }else{
-                                                                 ?>
-                                                                     <td><?=$key[$keys]?></td>
-                                                                 <?php
-                                                               }
-                                                                $x++;
-                                                             }
-                                                            ?>
-                                                        </tr>
-                                                        <?php
-                                                        $n++;
-                                                    }
-                                                    ?>
-                                                </tbody>
-                                              </table>
-                                              <?php
-                                            }else{
-                                              ?>
-                                                <strong class="text-danger">*Jumlah Centroid Belum di Isi</strong>
-                                              <?php
-                                            }
-                                            ?>
-                                          </div>
-                                          <?php
-                                      }
-                                  ?>
-                                </div>
-                            </div>
-                        </div>
+                        <?php
+                            if($this->session->userdata('process_dataset')!==NULL && $this->session->userdata('process_datasetindex')!==NULL){
+                              $index = $this->session->userdata('process_datasetindex');
+                              $dataset = $this->session->userdata('process_dataset');
+                              }
+                          ?>
                     </div>
 
-                    <!-- ISI CENTROID & CLUSTER-->
+                    <!-- halaman centroid & cluster-->
                     <div class="form-group row">
                         <label class="col-sm-2 col-form-label" for="simpleinput">Centroid</label>
                         <div class="col-sm-10">
@@ -316,7 +251,6 @@ if($page == "execute"){
                         </div>
                     <?php } ?>
                     <h3><strong>Jumlah Iterasi = <?=$n?> </strong></h3>
-                    <!-- <button class="btn btn-dark"><strong>Jumlah Iterasi = <?=$n?></strong></button> -->
                       <?php
                     }
                     
@@ -369,11 +303,11 @@ if($page == "execute"){
                     }
                     ?>
                   </table>
-                  <h4>Jumlah Cluster</h4>
+                  <h4>Hasil Clustering</h4>
                   <table class="table table-border">
                     <thead>
                       <th>Cluster</th>
-                      <th>Jumlah</th>
+                      <th>Jumlah Anggota</th>
                     </thead>
                     <?php
                     if($this->session->userdata("kmeans_result")!==NULL){
@@ -441,15 +375,5 @@ function Export2Word(element, filename = ''){
     }
 
     document.body.removeChild(downloadLink);
-}
-function typecentroid(e){
-  var type = $(e.target).val();
-  if(type=='custom'){
-    $('#clustermodal').modal('show');
-  }else if(type=='fill'){
-    $('#fm').show();
-  }else {
-    $('#fm').hide();
-  }
 }
 </script>
