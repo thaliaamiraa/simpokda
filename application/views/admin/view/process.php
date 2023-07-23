@@ -55,7 +55,7 @@ if($page == "execute"){
             <!-- End Left sidebar -->
             <div class="inbox-rightbar">
               <?php
-                //jika memilih menu dataset kmeans
+                //menu dataset kmeans
                 if($page == 'dataset'){
                 ?>
 
@@ -64,13 +64,13 @@ if($page == "execute"){
                       <h4>Pilih Data Excel</h4>
                       <form enctype="multipart/form-data">
                           <input id="upload" type="file" name="files">
-                          <button type="button" class="btn btn-primary btn-sm" id="upl" onclick="doupl()" style="display:none;">Upload</button>
+                          <button type="button" class="btn btn-primary btn-sm" id="upl" onclick="doupl()" style="display:none;"></button>
                       </form>
                     </div>
                     <?php
                         //Ketika upload file data excel akan dikirim ke controller operation untuk dilakukan pengambilan data dan dimasukan
                         if($this->session->userdata('process_dataset')!==NULL && $this->session->userdata('process_datasetindex')!==NULL){
-                          //ambil data session dari data yang di upload, dan dimasukan kedalam variabel biasa untuk dilakukan pengolahan
+                          //session ambil data dari data yang di upload, dan dimasukan kedalam variabel biasa untuk dilakukan pengolahan
                             $index = $this->session->userdata('process_datasetindex');
                             $dataset = $this->session->userdata('process_dataset');
                     ?>
