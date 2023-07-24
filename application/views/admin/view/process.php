@@ -16,11 +16,9 @@ $process = array();
 if($page == "cluster"){
   if(isset($_POST['simpan'])){
     //menyimpan fungsi kedalam session (jumlah centroid, maksimal looping, dan nilai centroid)
-    $this->session->set_userdata('maxloop',$this->input->post('maxloop'));
+    // $this->session->set_userdata('maxloop',$this->input->post('maxloop'));
     $this->session->set_userdata('centroid',$this->input->post('centroid'));
     $this->session->set_userdata('jmlcentroid',$this->input->post('jmlcentroid'));
-    $this->session->set_userdata('c',$this->input->post('c'));
-    $this->session->set_userdata('isimanual',$this->input->post('isimanual'));
   }
 }
  //perintah clustering
@@ -29,7 +27,7 @@ if($page == "execute"){
   if($this->session->userdata('datatoprocess')!==NULL && $this->session->userdata('jmlcentroid')!==NULL && $this->session->userdata('centroid')!==NULL){
     
     //menginisialisasi data dulu pake fungsi init dan masukan kedalam parameter, fungsi2 nya ada di M_kmeans
-    $this->m_kmeans->init($this->session->userdata('datatoprocess'),$this->session->userdata('jmlcentroid'),$this->session->userdata('centroid'),$this->session->userdata('maxloop'));
+    $this->m_kmeans->init($this->session->userdata('datatoprocess'),$this->session->userdata('jmlcentroid'),$this->session->userdata('centroid'));
     $this->m_kmeans->execute();
     //mengambil hasil proses dari data kmeans yang diolah
     $process = $this->m_kmeans->getprocess();
@@ -142,25 +140,19 @@ if($page == "execute"){
 
                     <!-- halaman centroid & cluster-->
                     <div class="form-group row">
-                        <label class="col-sm-2 col-form-label" for="simpleinput">Centroid</label>
-                        <div class="col-sm-10">
-                            <select class="form-control" name="centroid" onchange="typecentroid(event)">
-                              <option value="random" <?=$this->session->userdata('centroid')=='random'?'selected':'';?>>Centroid Acak</option>
-                            </select>
-                        </div>
-                    </div>
+    <label class="col-sm-2 col-form-label" for="simpleinput">Centroid</label>
+    <div class="col-sm-10">
+        <input class="form-control" type="text" name="centroid" readonly value="random">
+    </div>
+</div>
+
                     <div class="form-group row">
                         <label class="col-sm-2 col-form-label" for="example-email">Jumlah Cluster</label>
                         <div class="col-sm-10">
                             <input type="number" id="jmlcls" name="jmlcentroid" min="1" <?=$this->session->userdata('process_dataset')===NULL?'readonly':''?> max="<?=$this->session->userdata('process_dataset')!==NULL?sizeof($this->session->userdata('process_dataset')):1?>" required value="<?=$this->session->userdata('jmlcentroid')?>" class="form-control" placeholder="<?=$this->session->userdata('process_dataset')===NULL?'Masukan Dataset Dahulu':'Jumlah Cluster'?>">
                         </div>
                     </div>
-                    <div class="form-group row">
-                        <label class="col-sm-2 col-form-label" for="example-email">Max Perulangan</label>
-                        <div class="col-sm-10">
-                            <input type="number" name="maxloop" value="<?=$this->session->userdata('maxloop')!==NULL?$this->session->userdata('maxloop'):30?>" class="form-control" placeholder="Maksimal Perulangan" required>
-                        </div>
-                    </div>
+
                     <div class="form-group float-right">
                       <?php
                         if($this->session->userdata('process_dataset')!==NULL){
@@ -261,7 +253,35 @@ if($page == "execute"){
               <?php }else if($page == "result"){
                 $obj = "";
                 ?>
-                <h4>Hasil Clustering</h4>
+          <h4>Hasil Clustering</h4>
+                  <table class="table table-border">
+                    <thead>
+                      <th>Cluster</th>
+                      <th>Jumlah Anggota</th>
+                    </thead>
+                    <?php
+                    if($this->session->userdata("kmeans_result")!==NULL){
+                      $res = array();
+                      foreach ($this->session->userdata("kmeans_result") as $key) {
+                        if(!isset($res[$key[1]])){
+                          $res[$key[1]]=1;
+                        }else{
+                          $res[$key[1]]++;
+                        }
+                      }
+                      foreach ($res as $key => $val) {
+                        ?>
+                        <tr>
+                          <td><?=$key?></td>
+                          <td><?=$val?></td>
+                      </tr>
+                        <?php
+                      }
+                    }
+                    ?>
+                  </table>
+
+                <h4>Hasil Data Clustering</h4>
                 <div class="table-responsive" id="export">
                   <table class="table table-border">
                     <thead>
@@ -303,35 +323,9 @@ if($page == "execute"){
                     }
                     ?>
                   </table>
-                  <h4>Hasil Clustering</h4>
-                  <table class="table table-border">
-                    <thead>
-                      <th>Cluster</th>
-                      <th>Jumlah Anggota</th>
-                    </thead>
-                    <?php
-                    if($this->session->userdata("kmeans_result")!==NULL){
-                      $res = array();
-                      foreach ($this->session->userdata("kmeans_result") as $key) {
-                        if(!isset($res[$key[1]])){
-                          $res[$key[1]]=1;
-                        }else{
-                          $res[$key[1]]++;
-                        }
-                      }
-                      foreach ($res as $key => $val) {
-                        ?>
-                        <tr>
-                          <td><?=$key?></td>
-                          <td><?=$val?></td>
-                      </tr>
-                        <?php
-                      }
-                    }
-                    ?>
-                  </table>
+                  
                 </div>
-                <button class="btn btn-purple" onclick="Export2Word('export','export.docx')">Export</button>
+                <button class="btn btn-purple" onclick="Export2Word('export','exportClustering')">Export</button>
                 <?php
               } ?>
             </div>
@@ -341,29 +335,28 @@ if($page == "execute"){
 </div>
 <script>
 
-function Export2Word(element, filename = ''){
-    var preHtml = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Export HTML To Doc</title></head><body>";
-    var postHtml = "</body></html>";
-    var html = preHtml+document.getElementById(element).innerHTML+postHtml;
+function Export2Word(element, filename = '') {
+  var table = document.getElementById(element);
+  var html = "<table>" + table.innerHTML + "</table>";
 
     var blob = new Blob(['\ufeff', html], {
-        type: 'application/msword'
+        type: 'application/vnd.ms-excel'
     });
 
     // Specify link url
-    var url = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(html);
+    var url = 'data:application/vnd.ms-excel;charset=utf-8,' + encodeURIComponent(html);
 
     // Specify file name
-    filename = filename?filename+'.doc':'document.doc';
+    filename = filename ? filename + '.xls' : 'document.xls';
 
     // Create download link element
     var downloadLink = document.createElement("a");
 
     document.body.appendChild(downloadLink);
 
-    if(navigator.msSaveOrOpenBlob ){
+    if (navigator.msSaveOrOpenBlob) {
         navigator.msSaveOrOpenBlob(blob, filename);
-    }else{
+    } else {
         // Create a link to the file
         downloadLink.href = url;
 
@@ -376,4 +369,5 @@ function Export2Word(element, filename = ''){
 
     document.body.removeChild(downloadLink);
 }
+
 </script>

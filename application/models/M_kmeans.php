@@ -3,20 +3,21 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class M_kmeans extends CI_Model {
   var $data = array();
   var $cluster = [];
-  var $maxloop = 10;
   var $jmlcentroid = 0;
   var $dimensi = 0;
   var $centroid = 0;
   var $centroid_allof;
   var $data_cluster = [];
   var $distance = [];
+
+  var $maxloop = 100;
+
   function __construct() {
       parent::__construct();
   }
-  public function init($data = NULL,$jmlcentroid = 0,$centroid = NULL,$maxloop = 30){
+  public function init($data = NULL,$jmlcentroid = 0,$centroid = NULL){
     $this->data = $data;
     $this->cluster = [];
-    $this->maxloop = $maxloop;
     $this->jmlcentroid = $jmlcentroid;
     $this->dimensi = sizeof($this->data[0]);
     if($centroid == 'random'){
